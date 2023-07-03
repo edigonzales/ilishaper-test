@@ -1,0 +1,134 @@
+INTERLIS 2.3;
+
+/** Publikations-Modell der archäologischen Fundstellen.
+ */
+MODEL SO_ADA_Archaeologie_Publikation_20230417 (de)
+AT "https://ada.so.ch"
+VERSION "2023-04-17"  =
+  IMPORTS GeometryCHLV95_V1;
+
+  TOPIC Public =
+
+    DOMAIN
+
+      Qualitaet_Lokalisierung_Typ = (
+        A_eingemessen,
+        B_aus_Literatur,
+        C_Flurbezeichnung
+      );
+
+    /** Fundstelle aus dem Inventar der aktuell bekannten archäologischen Fundstellen.
+     * Stellen mit weiterem Fundpotential sind geschuetzt. Vollständig ausgegrabene oder Einzelfunde sind nicht geschützt.
+     */
+    CLASS Fundstelle_Base (ABSTRACT) =
+      /** Sprechender Schlüssel der Fundstelle. Beispiel: "103/60".
+       */
+      Fundstellen_Nummer : MANDATORY TEXT*10;
+      /** Flurname oder Adresse der Fundstelle.
+       */
+      Fundst_Adresse_Flurname : MANDATORY TEXT*30;
+      /** Kurzdefinition der Fundstelle. Beispiel: "Römische Villa".
+       */
+      Fundstellen_Art : MANDATORY TEXT*100;
+      /** "True", falls die Fundstelle eine archäologische Schutzzone ist.
+       */
+      Geschuetzt : MANDATORY BOOLEAN;
+      /** Dreistufe Einschätzung, wie gut die Fundstelle lokalisiert ist.
+       */
+      Qualitaet_Lokalisierung : MANDATORY Qualitaet_Lokalisierung_Typ;
+      /** Beschreibung der Fundstelle und Forschungsgeschichte.
+       */
+      Kurzbeschreibung : MANDATORY MTEXT*3000;
+      /** Alter Gemeindename der Dokumenten-Ablage (vor Fusionen).
+       */
+      Gemeindename_Ablage : MANDATORY TEXT*30;
+      /** Während dem Import über die Schnittstelle verwendeter Verweis auf den RRB (Wird in Beziehung verwandelt).
+       */
+      RRB_Nummer : TEXT*10;
+      UNIQUE Fundstellen_Nummer;
+    END Fundstelle_Base;
+
+    /** Archäologische Fundstellen im Siedlungsgebiet mit keinem oder wenig weiterem
+     * Fundpotential. Es handelt sich in der Regel um Einzelfunde oder vollständig
+     * ausgegrabene Fundstellen.
+     */
+    CLASS Punktfundstelle_Siedlungsgebiet
+    EXTENDS Fundstelle_Base =
+      /** Punkt-Geometrie der Flaeche
+       */
+      Punkt : MANDATORY GeometryCHLV95_V1.Coord2;
+    END Punktfundstelle_Siedlungsgebiet;
+
+    /** Archäologische Fundstellen im Siedlungsgebiet mit weiterem Fundpotential. Dabei handelt es
+     * sich um Reste von vergangenen Siedlungen, Friedhöfen, Werkstätten,etc.
+     */
+    CLASS Flaechenfundstelle_Siedlungsgebiet
+    EXTENDS Fundstelle_Base =
+      /** Polygon-Geometrie der Flaeche
+       */
+      Multipolygon : MANDATORY GeometryCHLV95_V1.MultiSurface;
+    END Flaechenfundstelle_Siedlungsgebiet;
+
+    /** Die Dokumente-Ablage der Fundstellen ist nach einem eingefrorenen Stand der Gemeinden strukturiert.
+     * In der Klasse Ablage_Gemeinde ist dieser eingefrorene Stand der Gemeinden enthalten.
+     */
+     CLASS Ablage_Gemeinde =
+      /** Name der Ablage-Gemeinde
+       */
+      Gemeindename_Ablage : MANDATORY TEXT*255;
+      /** Nummer der Ablage-Gemeinde.
+       */
+      Gemeindenummer_Ablage : MANDATORY 0 .. 9999;
+      /** Polygon der Archiv-Gemeinde.
+       */
+      Multipolygon : MANDATORY GeometryCHLV95_V1.MultiSurface;
+    END Ablage_Gemeinde;
+
+    /** Bereiche der Innenstädte, welche eine sehr hohe Dichte an Fundstellen aufweisen.
+     */
+    CLASS Schutzbereich_Innenstadt =
+      /** Name des Schutzbereichs. Bsp: Solothurn.
+       */
+      Name : MANDATORY TEXT*255;
+      /** Polygon des Schutzbereichs.
+       */
+      Polygon : MANDATORY GeometryCHLV95_V1.Surface;
+    END Schutzbereich_Innenstadt;
+
+  END Public;
+
+END SO_ADA_Archaeologie_Publikation_20230417.
+
+/** Zugriffsgeschütztes Publikations-Modell der archäologischen Fundstellen.
+ */
+MODEL SO_ADA_Archaeologie_Publikation_Restricted_20230417 (de)
+AT "https://ada.so.ch"
+VERSION "2023-04-17"  =
+  IMPORTS GeometryCHLV95_V1,SO_ADA_Archaeologie_Publikation_20230417;
+
+  TOPIC Restricted =
+
+    /** Archäologische Fundstellen mit keinem oder wenig weiterem
+     * Fundpotential. Es handelt sich in der Regel um Einzelfunde oder vollständig
+     * ausgegrabene Fundstellen.
+     */
+    CLASS Punktfundstelle
+    EXTENDS SO_ADA_Archaeologie_Publikation_20230417.Public.Fundstelle_Base =
+      /** Punkt-Geometrie der Flaeche
+       */
+      Punkt : MANDATORY GeometryCHLV95_V1.Coord2;
+    END Punktfundstelle;
+
+    /** Archäologische Fundstellen mit weiterem Fundpotential. Dabei handelt es
+     * sich um Reste von vergangenen Siedlungen, Friedhöfen, Werkstätten,etc.
+     */
+    CLASS Flaechenfundstelle
+    EXTENDS SO_ADA_Archaeologie_Publikation_20230417.Public.Fundstelle_Base =
+      /** Polygon-Geometrie der Flaeche
+       */
+      Multipolygon : MANDATORY GeometryCHLV95_V1.MultiSurface;
+    END Flaechenfundstelle;
+
+  END Restricted;
+
+END SO_ADA_Archaeologie_Publikation_Restricted_20230417.

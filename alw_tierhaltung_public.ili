@@ -13,26 +13,27 @@ MODEL SO_ALW_Landwirtschaft_Tierhaltung_Publikation_20230626 (de)
    */
   TOPIC Betriebsdaten_Strukturdaten =
 
-    /** Die Kulturen (Punktobjekte) des Agrarinformatinssystems GELAN zeigen, welche Punktobjekte (Bäume) von welchem Betrieb aus bewirtschaftet werden. Die zu erfassenden Objektpunkte (Bäume) müssen innerhalb der dem Bewirtschafter zugeteilten Bewirtschaftungseinheiten liegen und zeigen damit die detaillierte Nutzung der jeweiligen Bewirtschaftungseinheit.
+    /** Die Kulturen (Flächenobjekte) des Agrarinformatinssystems GELAN zeigen, welche Kulturflächen von welchem Betrieb aus bewirtschaftet werden. Die zu erfassenden Kulturpolygone müssen innerhalb der dem Bewirtschafter zugeteilten Bewirtschaftungseinheiten liegen und zeigen damit die detaillierte Nutzung der jeweiligen Bewirtschaftungseinheit.
+     * Die Kulturpolygone werden im Agrardatensystem GELAN mit der Bodenbedeckung verschnitten um die, für die effektive Bewirtschaftung massgebende Fläche zu ermitteln.
      * 
      * Die Ebene Kulturen umfasst sämtliche Nutzungsflächen von Akteuren, welche als Bewirtschafter von Flächen, als Tierhalter oder als Lebensmittelverarbeiter aufgrund von Bundes- oder Kantonsmassnahmen für den Vollzug massgebend sind.
      * 
      * Datenschutzvorgaben: Alle mit der Durchführung der Erhebung und Bearbeitung betrauten Personen sind verpflichtet, die im Erhebungsmaterial enthaltenen Angaben nach den Grundsätzen des Datenschutzgesetzes zu behandeln. Folgende Stellen benutzen die für ihre Aufgaben notwendigen Daten aus dem Agrarinformationssystem des Kantons: Kantonale Verwaltungen für Landwirtschaft,  Veterinärwesen, Wald, Jagd & Fischerei, Raumplanung, Umwelt, Lebensmittelsicherheit und Statistik, Bundesämter für Landwirtschaft, Statistik und Umwelt, Bundesamt für Lebensmittelsicherheit und Veterinärwesen, Bundesamt für wirtschaftliche Landesversorgung, Eidg. Zollverwaltung, TSM Treuhand GmbH (Verwaltung Milcheinlieferungen), Kantonale Laboratorien, Tierverkehrsdatenbank. Weitere Stellen können nach Prüfung einer Datenbezugsvereinbarung Daten aus dem Agrarinformatinssystem, im Rahmen der Datenschutzgesetzgebung, für spezifische Aufgaben verwenden (z.B. Hochschulen & Forschungsanstalten).
      */
-    CLASS Kultur_Punktelement =
-      /** Punktgeometrie oder Kooridnaten des Baumes bzw. des Kulturpunktes.
+    CLASS Kultur_Flaeche =
+      /** Geometrie des Kulturpolygons
        */
-      Geometrie : MANDATORY GeometryCHLV95_V1.Coord2;
+      Geometrie : MANDATORY GeometryCHLV95_V1.MultiSurface;
       /** Bezugsjahr der Daten (bei jahresbezogenem Datensatz)
        */
       Bezugsjahr : INTERLIS.GregorianYear;
-      /** GELAN-Identifikator des Kultur-Punktgeometrie. Im Agrarinformatinssystem GELAN bezeichnet als GEOID.
+      /** GELAN-Identifikator des Kulturpolygons. Im Agrarinformatinssystem GELAN bezeichnet als GEOID.
        */
       Kultur_ID : MANDATORY 1 .. 9999999;
-      /** Code der Kultur im Agrarinformationssystem GELAN (gemäss Kulturenkatalog des entsprenden Jahres).
+      /** Code der Kultur im Agrarinformationssystem GELAN (gemäss Kulturenkatalog des entsprenden Jahres). Im Agrarinformationssystem wird immer die Hauptkultur des entsprechenden Jahres deklariert.
        */
       Kulturcode_GELAN : 500 .. 999999;
-      /** Kulturbezeichnung im Agrarinformationssystem GELAN (gemäss Kulturenkatalog des entsprenden Jahres).
+      /** Kulturbezeichnung im Agrarinformationssystem GELAN (gemäss Kulturenkatalog des entsprenden Jahres). Im Agrarinformationssystem wird immer die Hauptkultur des entsprechenden Jahres deklariert.
        */
       Kulturart : TEXT*100;
       /** Code der administrativen Zonenzugehörigkeit der zugeordneten Bewirtschaftungseinheit (Zone, in welcher die Beirtschaftungseinheit den grössten Flächenanteil hat).
@@ -71,58 +72,31 @@ MODEL SO_ALW_Landwirtschaft_Tierhaltung_Publikation_20230626 (de)
       /** ID der Bewirtschaftungseinheit im Agrarinformationssystem GELAN, welche für die Kultur massgebend ist.
        */
       BewE_ID : TEXT*20;
-      /** Kulturfläche in Aren; Wert anrechenbar als "innerhalb der Landwirtschaftlichen Nutzfläche". Bei Punktgeometrien ist dieser Wert immer Null.
+      /** Kulturfläche in Aren; Wert gilt als Fläche anrechenbar als "innerhalb der Landwirtschaftlichen Nutzfläche".
        */
       Flaeche_Land_in_LN : 0.00 .. 99999.99;
-      /** Kulturfläche in Aren; Wert anrechenbar als "ausserhalb der Landwirtschaftlichen Nutzfläche". Bei Punktgeometrien ist dieser Wert immer Null.
+      /** Kulturfläche in Aren; Wert gilt als anrechenbar als "ausserhalb der Landwirtschaftlichen Nutzfläche"
        */
       Flaeche_Land_ausserhalb_LN : 0.00 .. 99999.99;
-      /** Baumzahl; bei Punktgeometrie wird die Baumzahl jeweil mit 1 eingetragen.
+      /** Baumzahl des Kulturpolygons.
        */
       Baumzahl : 0 .. 99999;
-      /** Massgebender Wert für BFF2-Qualität. Bei Punktgeometrien wird die BFF2-Qualität entsprechend der Baumzahl mit 1 ausgegeben, wenn der Baum die Qualitäskriterien erfüllt.
+      /** Massgebende Fläche mit BFF2-Qualität in Aren.
        */
       BFF2_Flaeche : 0.00 .. 99999.99;
-      /** Massgebender Wert aus einem Vertrag mit der Naturschutzfachstelle (NHG-Vertrag).
+      /** Massgebende Fläche mit Vertrag bei der Naturschutzfachstelle (NHG-Vertrag) in Aren.
        */
       Naturschutzvertrag_Flaeche : 0.00 .. 99999.99;
-      /** Massgebender Wert bei einer Vereinbarung im Rahmen eines Vernetzungsprojektes.
+      /** Massgebende Fläche mit Vereinbarung im Vernetzungsprojekt in Aren.
        */
       Vernetzung_Flaeche : 0.00 .. 99999.99;
-      /** Für die Vernetzung gewählte Nutzungsvariante
+      /** Für die Vernetzung gewählte Nutzungsvariante.
        */
       Vernetzung_Nutzungsvariante : TEXT*100;
-      /** Betriebsnummer KTIDB im Bundessystem AGIS (z.B. SOB130452 ) Entspricht der kantonalen Betriebsnummer mit einem Präfix aus Kantonskürzel und Buchstabe je nach Betreibstyp.
+      /** Betriebsnummer KTIDB im Bundessystem AGIS (z.B. SOB130452). Entspricht der kantonalen Betriebsnummer mit einem Präfix aus Kantonskürzel und Buchstabe je nach Betriebstyp.
        */
       Betriebsnummer_AGIS : TEXT*25;
-      /** Personennummer in der Personenverwaltung des Agrarinformationssystems GELAN
-       */
-      PID_GELAN : MANDATORY 200000 .. 9999999;
-      /** Kombination der Namenszeilen (Gesamtname für natürliche und übrige Personen)
-       */
-      Name_Vorname : TEXT*100;
-      /** Strasse der Gebäudeadressierung inkl. Hausnummer
-       */
-      Adresse : TEXT*75;
-      /** Telefon Privat
-       */
-      Telefon_Privat : TEXT*40;
-      /** Telefon Geschäft
-       */
-      Telefon_Geschaeft : TEXT*40;
-      /** Telefon Mobil
-       */
-      Telefon_Mobil : TEXT*40;
-      /** Mailadresse
-       */
-      Mailadresse : TEXT*50;
-      /** Gemeindenamen der Wohnsitzgemeinde
-       */
-      Gemeinde_Wohnsitz : TEXT*100;
-      /** Postleitzahl und Ortschaft; bei Postleitzahlen und Ortschaft ausserhalb der Schweiz allenfalls mit Präfix
-       */
-      PLZ_Ortschaft : TEXT*80;
-    END Kultur_Punktelement;
+    END Kultur_Flaeche;
 
     /** Standortverwaltung des Agrarinformationssystems GELAN umfasst die Standorte eines Betriebes.
      * 
